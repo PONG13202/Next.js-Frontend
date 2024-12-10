@@ -96,6 +96,10 @@ body {
   @apply rounded-br-2xl;
 }
 
+.table tbody tr:last-child td {
+  @apply border-b-0;
+}
+
 .btn-edit {
   @apply bg-gray-700 text-blue-400 px-4 py-2 rounded-none mr-1;
 }

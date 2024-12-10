@@ -49,7 +49,7 @@ export default function Page() {
                     timer: 1000
                 });
             }
-        } catch (error:any) {
+        } catch (error: any) {
             Swal.fire({
                 title: 'มีข้อผิดพลาด',
                 icon: 'error',
