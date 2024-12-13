@@ -15,10 +15,33 @@ export default function Page() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [level, setLevel] = useState('admin');
+    const [departments, setDepartments] = useState([]);
+    const [sections, setSections] = useState([]);
+    const [sectionId, setSectionId] = useState('');
+    const [departmentId, setDepartmentId] = useState('');
 
     useEffect(() => {
         fetchUsers();
+        fetchDepartments();
     }, []);
+
+    const fetchDepartments = async () => {
+        const response = await axios.get(`${config.apiUrl}/api/department/list`);
+        setDepartments(response.data);
+        setDepartmentId(response.data[0].id);
+        fetchSections(response.data[0].id);
+    }
+
+    const fetchSections = async (departmentId: string) => {
+        const response = await axios.get(`${config.apiUrl}/api/section/listByDepartment/${departmentId}`);
+        setSections(response.data);
+        setSectionId(response.data[0].id);
+    }
+
+    const handleChangeDepartment = (departmentId: string) => {
+        setDepartmentId(departmentId);
+        fetchSections(departmentId);
+    }
 
     const fetchUsers = async () => {
         const response = await axios.get(`${config.apiUrl}/api/user/list`);
@@ -47,7 +70,8 @@ export default function Page() {
             const payload = {
                 username: username,
                 password: password,
-                level: level
+                level: level,
+                sectionId: parseInt(sectionId + ""),
             }
 
             if (id == '') {
@@ -80,6 +104,13 @@ export default function Page() {
         setConfirmPassword('');
         setLevel(user.level);
         setShowModal(true);
+
+        const departmentId = user?.section?.department?.id;
+        setDepartmentId(departmentId);
+        fetchSections(departmentId);
+
+        const sectionId = user?.section?.id;
+        setSectionId(sectionId);
     }
 
     const handleDelete = async (id: string) => {
@@ -113,6 +144,8 @@ export default function Page() {
                         <tr>
                             <th>Username</th>
                             <th style={{ width: '100px' }}>Level</th>
+                            <th>แผนก</th>
+                            <th>ฝ่าย</th>
                             <th className="text-center" style={{ width: '220px' }}></th>
                         </tr>
                     </thead>
@@ -121,7 +154,9 @@ export default function Page() {
                             <tr key={user.id}>
                                 <td>{user.username}</td>
                                 <td>{user.level}</td>
-                                <td className="text-center">
+                                <td>{user?.section?.department?.name}</td>
+                                <td>{user?.section?.name}</td>
+                                <td className="text-center" style={{ width: '220px' }}>
                                     <button className="btn-edit"
                                         onClick={() => handleEdit(user)}>
                                         <i className="fa-solid fa-edit mr-2"></i>
@@ -141,7 +176,35 @@ export default function Page() {
 
             <Modal title="เพิ่มข้อมูลพนักงาน" isOpen={showModal}
                 onClose={() => handleCloseModal()}>
-                <div>Username</div>
+
+                <div className="flex gap-4">
+                    <div className="w-1/2">
+                        <div>แผนก</div>
+                        <select className="form-control w-full"
+                            value={departmentId}
+                            onChange={(e) => handleChangeDepartment(e.target.value)}>
+                            {departments.map((department: any) => (
+                                <option key={department.id} value={department.id}>
+                                    {department.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="w-1/2">
+                        <div>ฝ่าย</div>
+                        <select className="form-control w-full"
+                            value={sectionId}
+                            onChange={(e) => setSectionId(e.target.value)}>
+                            {sections.map((section: any) => (
+                                <option key={section.id} value={section.id}>
+                                    {section.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="mt-5">Username</div>
                 <input
                     type="text"
                     className="form-control"
