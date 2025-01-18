@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import config from '@/app/config';
@@ -17,14 +17,33 @@ export default function Page() {
     const [remark, setRemark] = useState('');
     const [id, setId] = useState(0);
 
+    // pagination
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(2);
+    const [totalPage, setTotalPage] = useState(0);
+    const [totalPageList, setTotalPageList] = useState<number[]>([]); // array ไว้เก็บเลขหน้า
+
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [page]); // เพิ่ม page เป็น dependency
 
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${config.apiUrl}/api/device/list`);
-            setDevices(response.data);
+            const params = {
+                page: page,
+                pageSize: pageSize, // ส่ง pageSize ไปที่ backend
+            };
+            const response = await axios.get(`${config.apiUrl}/api/device/list`, { params });
+            setDevices(response.data.results);
+    
+            setTotalPage(response.data.totalPage);
+
+            // อัพเดต totalPageList
+            const pages = [];
+            for (let i = 1; i <= response.data.totalPage; i++) {
+                pages.push(i);
+            }
+            setTotalPageList(pages);
         } catch (error: any) {
             Swal.fire({
                 icon: 'error',
@@ -32,7 +51,7 @@ export default function Page() {
                 text: error.message,
             });
         }
-    }
+    };
 
     const handleShowModal = () => {
         setShowModal(true);
@@ -104,6 +123,22 @@ export default function Page() {
         }
     }
 
+    const handlePreviousPage = () => {
+        if (page > 1) {
+            setPage(page - 1);
+        }
+    }
+
+    const handleNextPage = () => {
+        if (page < totalPage) {
+            setPage(page + 1);
+        }
+    }
+
+    const handleChangePage = (page: number) => {
+        setPage(page);
+    }
+
     return (
         <div className='card'>
             <h1>ทะเบียนวัสดุ อุปกรณ์</h1>
@@ -146,6 +181,27 @@ export default function Page() {
                         ))}
                     </tbody>
                 </table>
+
+                {/* pagination */}
+                <div className='mt-3'>
+                    <button className='btn-edit' onClick={handlePreviousPage}>
+                        <i className='fa-solid fa-arrow-left'></i>
+                    </button>
+                    {totalPageList.map((item: any) => (
+                        page === parseInt(item) ? (
+                            <button key={item} className='bg-blue-500 text-white px-3 py-2 rounded-md'>
+                                {item}
+                            </button>
+                        ) : (
+                            <button key={item} className='btn-edit mr-1 ml-1' onClick={() => handleChangePage(item)}>
+                                {item}
+                            </button>
+                        )
+                    ))}
+                    <button className='btn-edit' onClick={handleNextPage}>
+                        <i className='fa-solid fa-arrow-right'></i>
+                    </button>
+                </div>
             </div>
 
             <Modal title='ทะเบียนวัสดุ อุปกรณ์' isOpen={showModal}
