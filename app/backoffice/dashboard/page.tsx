@@ -48,18 +48,18 @@ export default function Page() {
         const response = await axios.get(`${config.apiUrl}/api/repairRecord/dashboard`, {
             params: params
         });
-
+    
         setTotalRepairRecord(response.data.totalRepairRecord);
         setTotalRepairRecordNotComplete(response.data.totalRepairRecordNotComplete);
         setTotalRepairRecordComplete(response.data.totalRepairRecordComplete);
         setTotalAmount(response.data.totalAmount);
-
+    
         let listIncomePerDays = [];
-
+    
         for (let i = 0; i < response.data.listIncomePerDays.length; i++) {
             listIncomePerDays.push(response.data.listIncomePerDays[i].amount);
         }
-
+    
         renderChartIncomePerDays(listIncomePerDays);
         renderChartPie(
             response.data.totalRepairRecordComplete,
@@ -67,6 +67,7 @@ export default function Page() {
             response.data.totalRepairRecord
         );
     }
+    
 
     const renderChartIncomePerDays = (data: number[]) => {
         const options = {
@@ -77,12 +78,13 @@ export default function Page() {
             },
         };
         const chartIncomePerDays = document.getElementById('chartIncomePerDays');
-
+    
         if (chartIncomePerDays) {
             const chart = new Chart(chartIncomePerDays, options);
             chart.render();
         }
     };
+    
 
     const renderChartIncomePerMonth = (data: number[]) => {
         const options = {
@@ -169,28 +171,30 @@ export default function Page() {
 
             <div className="text-2xl font-bold mt-5 mb-2">รายได้รายวัน</div>
             <div className="flex mb-3 mt-2 gap-4 items-end">
-                <div className="w-[100px]">
-                    <div>ปี</div>
-                    <select className="form-control" onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-                        {listYear.map((year, index) => (
-                            <option key={index} value={year}>{year}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="w-[100px]">
-                    <div>เดือน</div>
-                    <select className="form-control" onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-                        {listMonth.map((month, index) => (
-                            <option key={index} value={index}>{month}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="w-[200px] ms-1">
-                    <button className="btn" style={{ paddingRight: '20px', paddingLeft: '10px' }} onClick={fetchDataIncomePerDay}>
-                        <i className="fa-solid fa-magnifying-glass ms-3 pe-3"></i>
-                        แสดงข้อมูล
-                    </button>
-                </div>
+            <div className="w-[100px]">
+    <div>ปี</div>
+    <select className="form-control" onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+        {listYear.map((year, index) => (
+            <option key={index} value={year}>{year}</option>
+        ))}
+    </select>
+</div>
+<div className="w-[100px]">
+    <div>เดือน</div>
+    <select className="form-control" onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+        {listMonth.map((month, index) => (
+            <option key={index} value={index}>{month}</option>
+        ))}
+    </select>
+</div>
+
+<div className="w-[200px] ms-1">
+    <button className="btn" style={{ paddingRight: '20px', paddingLeft: '10px' }} onClick={fetchDataIncomePerDay}>
+        <i className="fa-solid fa-magnifying-glass ms-3 pe-3"></i>
+        แสดงข้อมูล
+    </button>
+</div>
+
             </div>
             <div id="chartIncomePerDays"></div>
 
